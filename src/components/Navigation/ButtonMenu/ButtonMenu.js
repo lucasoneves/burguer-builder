@@ -1,7 +1,7 @@
 import React from 'react'
 import classes from './ButtonMenu.module.css'
 
-const buttonMenu = props => {
+const buttonMenu = (props) => {
   return (
     <div 
       onClick={props.clicked}
