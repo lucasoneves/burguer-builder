@@ -1,0 +1,7 @@
+.ButtonMenu span {
+  width: 30px;
+  height: 2px;  
+  display: block;
+  background-color: #fff;
+  margin: 5px 0;
+}
