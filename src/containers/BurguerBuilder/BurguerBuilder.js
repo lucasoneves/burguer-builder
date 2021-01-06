@@ -6,7 +6,7 @@ import Modal from "../../components/UI/Modal/Modal";
 import OrderSummary from "../../components/Burguer/OrderSummary/OrderSummary";
 import axios from "../../axios-orders";
 import Spinner from "../../components/UI/Spinner/Spinner";
-import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler'
+import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 
 const INGREDIENT_PRICES = {
   salad: 0.4,
@@ -17,17 +17,28 @@ const INGREDIENT_PRICES = {
 
 class BurguerBuilder extends Component {
   state = {
-    ingredients: {
-      salad: 0,
-      bacon: 0,
-      cheese: 0,
-      meat: 0,
-    },
+    ingredients: null,
     totalPrice: 4,
     purchasable: false,
     purchasing: false,
     loading: false,
+    error: false,
   };
+
+  componentDidMount() {
+    axios
+      .get(
+        "https://burguer-builder-9c311-default-rtdb.firebaseio.com/ingredients.json"
+      )
+      .then((response) => {
+        this.setState({
+          ingredients: response.data,
+        });
+      })
+      .catch((err) => {
+        this.setState({ error: true });
+      });
+  }
 
   updatePurchaseState(ingredients) {
     const sum = Object.keys(ingredients)
@@ -150,18 +161,31 @@ class BurguerBuilder extends Component {
       );
     }
 
+    let burguer = this.state.error ? (
+      <p>Não foi possível trazer os dados</p>
+    ) : (
+      <Spinner></Spinner>
+    );
+
+    if (this.state.ingredients) {
+      burguer = (
+        <Aux>
+          <Burguer ingredients={this.state.ingredients} />
+          <BuildControls
+            ordered={this.purchasaHandler}
+            disabled={disabledInfo}
+            ingredientAdded={this.addIngredientHandler}
+            ingredientRemoved={this.removeIngredientHandler}
+            purchasable={this.state.purchasable}
+            price={this.state.totalPrice}
+          />
+        </Aux>
+      );
+    }
     return (
       <Aux>
         {orderSummary}
-        <Burguer ingredients={this.state.ingredients} />
-        <BuildControls
-          ordered={this.purchasaHandler}
-          disabled={disabledInfo}
-          ingredientAdded={this.addIngredientHandler}
-          ingredientRemoved={this.removeIngredientHandler}
-          purchasable={this.state.purchasable}
-          price={this.state.totalPrice}
-        />
+        {burguer}
       </Aux>
     );
   }
